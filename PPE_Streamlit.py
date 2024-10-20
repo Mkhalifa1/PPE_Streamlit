@@ -3,15 +3,13 @@ import warnings
 warnings.filterwarnings('ignore')
 import pathlib
 from pathlib import Path
-temp = pathlib.PosixPath
-pathlib.PosixPath = pathlib.WindowsPath
-
 import torch
 import cv2
 import os
 import numpy as np
 from datetime import datetime
 import tempfile  # To handle temporary video files
+import urllib.request  # To download large files from a URL
 
 # Define global parameters
 CONFIDENCE_THRESHOLD = 0.5
@@ -27,7 +25,22 @@ st.write('Upload a video, and the model will detect any missing safety gear such
 # Upload video file
 uploaded_file = st.file_uploader("Upload your video", type=["mp4", "avi", "mov"])
 
-def load_model(weights_path='best.pt', conf=0.5, iou=0.4):
+# Function to download model weights from cloud storage if they don't exist locally
+def download_weights(url, output_path):
+    if not os.path.exists(output_path):
+        st.write(f"Downloading {output_path}...")
+        urllib.request.urlretrieve(url, output_path)
+        st.write(f"Downloaded {output_path}.")
+
+# URLs for model weights
+yolov5_url = "https://path-to-your-cloud-storage/yolov5s.pt"  # Replace with your URL
+best_model_url = "https://path-to-your-cloud-storage/best.pt"  # Replace with your URL
+
+# Download weights if not already available
+download_weights(yolov5_url, "yolov5s.pt")
+download_weights(best_model_url, "best.pt")
+
+def load_model(weights_path, conf=0.5, iou=0.4):
     """Load YOLOv5 model with error handling and custom configuration."""
     try:
         model = torch.hub.load('ultralytics/yolov5', 'custom', path=weights_path, force_reload=True)
