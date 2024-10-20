@@ -1,7 +1,6 @@
 import streamlit as st
 import warnings
 warnings.filterwarnings('ignore')
-import pathlib
 from pathlib import Path
 import torch
 import cv2
